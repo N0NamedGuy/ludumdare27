@@ -8,16 +8,6 @@
     gameCanvas.width = 640;
     gameCanvas.height = 480;
 
-    function toXY(index, map) {
-        return {
-            x: index % map.width,
-            y: Math.floor(index / map.width)
-        };
-    }
-
-    function fromXY(x, y, map) {
-        return y * map.width + x;
-    }
 
     function loadTileset(tileset) {
         var img = new Image();
@@ -47,81 +37,101 @@
         });
     }
 
-    function findTileset(map, gid) {
-        var tilesets = _.filter(map.tilesets, function (tileset) {
-            return gid >= tileset.firstgid;
-        });
 
-        if (tilesets.length === 0) {
-            return undefined;
-        }
+    $("div#container").append(gameCanvas);
 
-        return _.max(tilesets, function (tileset) {
-            return tileset.firstgid;
-        });
+    function toXY(index, width) {
+        return {
+            x: index % width,
+            y: Math.floor(index / width)
+        };
     }
 
-    function drawTileLayer(map, layer, ctx) {
+    function fromXY(x, y, width) {
+        return y * width + x;
+    }
 
-        for (var i = 0; i < layer.data.length; i++) {
-            var gid = layer.data[i];
-            var xy = toXY(i, map);
+    function appendMapMethods(map) {
 
-            var tileset = findTileset(map, gid);
+        map.toXY = function (index) {
+            return toXY(index, this.width);
+        };
 
+        map.fromXY = function (x, y) {
+            return toXY(x, y, this.width);
+        };
+
+        map.findTileset = function(gid) {
+            var tilesets = _.filter(this.tilesets, function (tileset) {
+                return gid >= tileset.firstgid;
+            });
+
+            if (tilesets.length === 0) {
+                return undefined;
+            }
+
+            return _.max(tilesets, function (tileset) {
+                return tileset.firstgid;
+            });
+        };
+
+        map.drawTileLayer = function(layer, ctx) {
+            for (var i = 0; i < layer.data.length; i++) {
+                var gid = layer.data[i];
+                var xy = this.toXY(i);
+
+                var tileset = this.findTileset(gid);
+
+                if (tileset) {
+                    var txy = toXY(gid - tileset.firstgid,
+                            tileset.imagewidth / tileset.tilewidth);
+
+                    ctx.drawImage(tileset.img,
+                        txy.x * tileset.tilewidth,
+                        txy.y * tileset.tileheight,
+                        tileset.tilewidth,
+                        tileset.tileheight,
+                        xy.x * this.tilewidth,
+                        xy.y * this.tileheight,
+                        tileset.tilewidth,
+                        tileset.tileheight);
+                }
+            }
+        };
+
+        map.drawEntity = function(entity, ctx) {
+            var gid = entity.gid;
+            var tileset = this.findTileset(gid);
             if (tileset) {
-                var txy = toXY(gid - tileset.firstgid, {
-                    width: tileset.imagewidth / tileset.tilewidth,
-                    height: tileset.imageheight / tileset.tileheight
-                });
+                var txy = toXY(gid - tileset.firstgid, 
+                    tileset.imagewidth / tileset.tilewidth);
 
                 ctx.drawImage(tileset.img,
                     txy.x * tileset.tilewidth,
                     txy.y * tileset.tileheight,
                     tileset.tilewidth,
                     tileset.tileheight,
-                    xy.x * map.tilewidth,
-                    xy.y * map.tileheight,
+                    entity.x,
+                    entity.y,
                     tileset.tilewidth,
                     tileset.tileheight);
             }
-        }
-    }
+        };
 
-    function getLayer(map, name) {
-        return _.find(map.layers, function (layer) {
-            return layer.name === name;
-        });
-    }
-
-    function drawEntity(map, entity, ctx) {
-        var gid = entity.gid;
-        var tileset = findTileset(map, gid);
-        if (tileset) {
-            var txy = toXY(gid - tileset.firstgid, {
-                width: tileset.imagewidth / tileset.tilewidth,
-                height: tileset.imageheight / tileset.tileheight
+        map.getLayer = function(name) {
+            return _.find(this.layers, function (layer) {
+                return layer.name === name;
             });
+        };
 
-            ctx.drawImage(tileset.img,
-                txy.x * tileset.tilewidth,
-                txy.y * tileset.tileheight,
-                tileset.tilewidth,
-                tileset.tileheight,
-                entity.x,
-                entity.y,
-                tileset.tilewidth,
-                tileset.tileheight);
-        }
+        return map;
     }
-
-    $("div#container").append(gameCanvas);
 
     function playGame(map) {
         // Preload some stuff, so we don't need to ask everytime where stuff is
         var ctx = gameCanvas.getContext('2d');
-        var bgLayer = getLayer(map, "background");
-        var entLayer = getLayer(map, "entities");
+        var bgLayer = map.getLayer("background");
+        var entLayer = map.getLayer("entities");
 
         var player = {
             x: 0,
@@ -132,12 +142,17 @@
             player = _.find(layer.objects, function (obj) {
                 return obj.type === "player";
             });
-            console.log(player);
+
+            player.map = map;
+            player.moveTo = function (x, y) {
+                var tileIndex = fromXY(x, y, map);
+
+            };
         }
         
         function renderGame() {
-            drawTileLayer(map, bgLayer, ctx);
-            drawEntity(map, player, ctx);
+            map.drawTileLayer(bgLayer, ctx);
+            map.drawEntity(player, ctx);
         }
 
         loadEntities(entLayer);
@@ -154,7 +169,9 @@
         $.getJSON("maps/demo.json", function (json) {
             loadMap(json, function (map) {
                 console.log("Map loaded");
-                playGame(map);
+                
+                var newMap = appendMapMethods(map);
+                playGame(newMap);
             });
         });
     });
