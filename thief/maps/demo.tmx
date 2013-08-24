@@ -41,6 +41,10 @@
 </data>
  </layer>
  <objectgroup name="entities" width="20" height="20">
-  <object type="player" gid="241" x="123" y="162"/>
+  <object name="The Thief" type="player" gid="241" x="112" y="209" width="32" height="32">
+   <properties>
+    <property name="speed" value="5"/>
+   </properties>
+  </object>
  </objectgroup>
 </map>

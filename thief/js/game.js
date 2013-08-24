@@ -110,8 +110,8 @@
                     txy.y * tileset.tileheight,
                     tileset.tilewidth,
                     tileset.tileheight,
-                    entity.x - 16,
-                    entity.y - 16,
+                    entity.x - (entity.width / 2),
+                    entity.y - (entity.height / 2),
                     tileset.tilewidth,
                     tileset.tileheight);
             }
@@ -145,11 +145,23 @@
         var ctx = gameCanvas.getContext('2d');
         var bgLayer = map.getLayer("background");
         var entLayer = map.getLayer("entities");
+        var actions = {
+            "up": false,
+            "down": false,
+            "left": false,
+            "right": false
+        };
+        var keys = {
+            87: "up",
+            65: "left",
+            83: "down",
+            68: "right"
+        };
 
         var player = {
             x: 0,
             y: 0
-        }
+        };
 
         function loadEntities(layer) {
             player = _.find(layer.objects, function (obj) {
@@ -157,14 +169,51 @@
             });
 
             player.map = map;
+            // The origin of the player is at its center
+            player.x += player.width / 2;
+            player.y -= player.height / 2;
+
+            console.log(player.y);
             player.moveTo = function (x, y) {
                 var props = this.map.getTileProps(bgLayer, x, y);
                 
                 if (props && props.walkable === "true") {
                     this.x = x;
                     this.y = y;
+                    return true;
+                } else {
+                    return false;
                 }
             };
+
+            player.moveRelative = function (x, y) {
+                var properties;
+                var speed = 1.0;
+                
+                properties = this.properties;
+                if (properties && properties.speed) {
+                    speed = properties.speed;
+                }
+                return this.moveTo(player.x + (x * speed), player.y + (y * speed));
+            }
+
+        }
+
+        function processInput(dt) {
+            var dx = 0, dy = 0;
+            if (actions.left) {
+                dx = -1;
+            } else if (actions.right) {
+                dx = 1;
+            }
+
+            if (actions.up) {
+                dy = -1;
+            } else if (actions.down) {
+                dy = 1;
+            }
+
+            player.moveRelative(dx * dt, dy * dt);
         }
         
         function renderGame() {
@@ -174,7 +223,7 @@
 
         loadEntities(entLayer);
 
-        $(gameCanvas).on("touchend", function (e) {
+        $(gameCanvas).on("click touchend", function (e) {
             var x;
             var y;
             var ev;
@@ -189,9 +238,6 @@
                 }
                 var touch = touches[0];
 
-                console.log("Touchend event up in this bitch");
-                console.log(touch);
-
                 ev = touch;
             }
 
@@ -204,7 +250,16 @@
 
         });
 
+        $(window).on("keydown keyup", function (e) {
+            var action = keys[e.keyCode];
+            if (action) {
+                actions[action] = (e.type == "keydown");
+            }
+
+        });
+
         function mainloop() {
+            processInput(1.0);
             renderGame();
             if (window.requestAnimationFrame) {
                 window.requestAnimationFrame(mainloop);
