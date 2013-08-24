@@ -47,34 +47,60 @@
         });
     }
 
-    function drawMap(map, ctx) {
-        _.each(map.layers, function (layer) {
-            for (var i = 0; i < layer.data.length; i++) {
-                var gid = layer.data[i];
-                var xy = toXY(i, map);
+    function drawLayer(map, layer, ctx) {
+        function findTileset(map, gid) {
+            var tilesets = _.filter(map.tilesets, function (tileset) {
+                return gid >= tileset.firstgid;
+            });
 
-                var tileset = _.find(map.tilesets, function (tileset) {
-                    return tileset.firstgid <= gid;
+            if (tilesets.length === 0) {
+                return undefined;
+            }
+
+            return _.max(tilesets, function (tileset) {
+                return tileset.firstgid;
+            });
+        }
+
+        for (var i = 0; i < layer.data.length; i++) {
+            var gid = layer.data[i];
+            var xy = toXY(i, map);
+
+            var tileset = findTileset(map, gid);
+
+            if (tileset) {
+                var txy = toXY(gid - tileset.firstgid, {
+                    width: tileset.imagewidth / tileset.tilewidth,
+                    height: tileset.imageheight / tileset.tileheight
                 });
 
-                if (tileset) {
-                    var txy = toXY(gid - tileset.firstgid, {
-                        width: tileset.imagewidth / tileset.tilewidth,
-                        height: tileset.imageheight / tileset.tileheight
-                    });
-
-                    ctx.drawImage(tileset.img,
-                        txy.x * tileset.tilewidth,
-                        txy.y * tileset.tileheight,
-                        tileset.tilewidth,
-                        tileset.tileheight,
-                        xy.x * map.tilewidth,
-                        xy.y * map.tileheight,
-                        tileset.tilewidth,
-                        tileset.tileheight);
-                }
+                ctx.drawImage(tileset.img,
+                    txy.x * tileset.tilewidth,
+                    txy.y * tileset.tileheight,
+                    tileset.tilewidth,
+                    tileset.tileheight,
+                    xy.x * map.tilewidth,
+                    xy.y * map.tileheight,
+                    tileset.tilewidth,
+                    tileset.tileheight);
             }
-        });
+        }
+    }
+
+
+    function drawMap(map, ctx) {
+        function getLayer(map, name) {
+            return _.find(map.layers, function (layer) {
+                return layer.name === name;
+            });
+        }
+
+        var bgLayer = getLayer(map, "background");
+        var entityLayer = getLayer(map, "entities");
+
+        drawLayer(map, bgLayer, ctx);
+        console.log("drawing ent layer");
+        drawLayer(map, entityLayer, ctx);
     }
 
     $("div#container").append(gameCanvas);
@@ -83,7 +109,7 @@
         function mainloop_() {
             var ctx = gameCanvas.getContext('2d');
             drawMap(map, ctx);
-            window.requestAnimationFrame(mainloop(map));
+//            window.requestAnimationFrame(mainloop(map));
         }
 
         return mainloop_;
