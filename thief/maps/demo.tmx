@@ -41,9 +41,21 @@
 </data>
  </layer>
  <objectgroup name="entities" width="20" height="20">
-  <object name="The Thief" type="player" gid="241" x="142" y="138" width="32" height="32">
+  <object name="Treasure" type="treasure" gid="81" x="150" y="148" width="32" height="32">
+   <properties>
+    <property name="open" value="false"/>
+    <property name="opengid" value="82"/>
+   </properties>
+  </object>
+  <object name="The Thief" type="player" gid="241" x="147" y="75" width="32" height="32">
    <properties>
     <property name="speed" value="10"/>
+   </properties>
+  </object>
+  <object name="Treasure" type="treasure" gid="81" x="150" y="148" width="32" height="32">
+   <properties>
+    <property name="open" value="false"/>
+    <property name="opengid" value="82"/>
    </properties>
   </object>
  </objectgroup>

@@ -159,10 +159,8 @@
             68: "right"
         };
 
-        var player = {
-            x: 0,
-            y: 0
-        };
+        var player = {};
+        var treasure = {};
 
         function prepareEntity(entity, map) {
             entity.map = map;
@@ -217,6 +215,30 @@
                 this.target.y = y;
             }
 
+            entity.collide = function (other) {
+                var mw2 = this.width / 2;
+                var mh2 = this.height / 2;
+                
+                var ow2 = other.width / 2;
+                var oh2 = other.height / 2;
+
+                var myCorners = [
+                    {x: this.x - mw2, y: this.y - mh2}, // TL
+                    {x: this.x + mw2, y: this.y - mh2}, // TR
+                    {x: this.x - mw2, y: this.y + mh2}, // BL
+                    {x: this.x + mw2, y: this.y + mh2}  // BR
+                ];
+
+                var ret = _.all(myCorners, function (corner) {
+                    var xOK = (corner.x < (other.x - ow2) || corner.x > (other.x + ow2));
+                    var yOK = (corner.y < (other.y - oh2) || corner.y > (other.y + oh2));
+
+                    return xOK || yOK;
+                });
+
+                return !ret; 
+            }
+
             return entity;
         }
 
@@ -225,7 +247,14 @@
                 return obj.type === "player";
             });
 
+            treasure = _.find(layer.objects, function (obj) {
+                return obj.type === "treasure";
+            });
+
+            console.log(treasure);
+
             player = prepareEntity(player, map);
+            treasure = prepareEntity(treasure, map);
         }
 
         function processInput(dt) {
@@ -249,10 +278,18 @@
 
         function processLogic(dt) {
             player.update(dt);
+
+            if (player.collide(treasure)) {
+                treasure.gid = treasure.properties.opengid;
+                $("#debug").html("Treasure collision");
+            } else {
+                $("#debug").html("No collision");
+            }
         }
         
         function renderGame() {
             map.drawTileLayer(bgLayer, ctx);
+            map.drawEntity(treasure, ctx);
             map.drawEntity(player, ctx);
         }
 
