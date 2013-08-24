@@ -64,8 +64,6 @@
                         height: tileset.imageheight / tileset.tileheight
                     });
 
-                    console.log(gid, txy);
-
                     ctx.drawImage(tileset.img,
                         txy.x * tileset.tilewidth,
                         txy.y * tileset.tileheight,
@@ -82,9 +80,11 @@
 
     $("div#container").append(gameCanvas);
 
-    $.getJSON("maps/demo.json", function (json) {
-        loadMap(json, function (map) {
-            drawMap(map, ctx);
+    $(document).ready(function () {
+        $.getJSON("maps/demo.json", function (json) {
+            loadMap(json, function (map) {
+                drawMap(map, ctx);
+            });
         });
     });
 }());

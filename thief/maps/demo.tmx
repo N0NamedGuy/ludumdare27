@@ -2,6 +2,11 @@
 <map version="1.0" orientation="orthogonal" width="20" height="20" tilewidth="32" tileheight="32">
  <tileset firstgid="1" name="inside" tilewidth="32" tileheight="32">
   <image source="../tilesets/inside.png" width="640" height="400"/>
+  <tile id="21">
+   <properties>
+    <property name="walkable" value="true"/>
+   </properties>
+  </tile>
  </tileset>
  <layer name="Camada de Tiles 1" width="20" height="20">
   <data encoding="csv">
