@@ -13,7 +13,6 @@
         var deferred = $.Deferred();
 
         img.onload = function () {
-            console.log("Image loaded");
             deferred.resolve();
         };
 
@@ -169,6 +168,7 @@
             entity.x += entity.width / 2;
             entity.y -= entity.height / 2;
             entity.target = undefined;
+            entity.wallHit = false;
 
             entity._update = function (dt) {
                 if (this.target === undefined) {
@@ -184,7 +184,7 @@
                 var nx = this.x + speed * Math.cos(angle) * dt;
                 var ny = this.y + speed * Math.sin(angle) * dt;
 
-                this.moveTo(nx, ny);
+                this.wallHit = !this.moveTo(nx, ny);
 
                 var sdt = speed * dt;
 
@@ -252,6 +252,40 @@
                 return !ret; 
             }
 
+            entity.hasHitWall = function () {
+                var ret = this.wallHit;
+                this.wallHit = false;
+                return ret;
+            }
+
+            return entity;
+        }
+
+        function prepareGuard(entity) {
+            entity.update = function (dt) {
+                if (this.target === undefined || this.hasHitWall()) {
+                    var dir = Math.floor(Math.random() * 4);
+                    var amt = Math.floor(Math.random() * 200);
+                    
+                    switch (dir) {
+                    case 0:
+                        this.setTarget(this.x + amt, this.y);
+                        break;
+                    case 1:
+                        this.setTarget(this.x - amt, this.y);
+                        break;
+                    case 2:
+                        this.setTarget(this.x, this.y + amt);
+                        break;
+                    case 3:
+                        this.setTarget(this.x, this.y - amt);
+                        break;
+                    }
+                }
+                
+                this._update(dt);
+            }
+
             return entity;
         }
 
@@ -272,7 +306,7 @@
             treasure = prepareEntity(treasure, map);
 
             guards = _.map(guards_, function (guard) {
-                return prepareEntity(guard, map);
+                return prepareGuard(prepareEntity(guard, map));
             });
         }
 
@@ -297,6 +331,9 @@
 
         function processLogic(dt) {
             player.update(dt);
+            _.each(guards, function (guard) {
+                guard.update(dt);
+            });
 
             if (player.collide(treasure)) {
                 treasure.gid = treasure.properties.opengid;

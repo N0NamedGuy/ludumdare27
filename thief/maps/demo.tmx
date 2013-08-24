@@ -41,7 +41,7 @@
 </data>
  </layer>
  <objectgroup name="entities" width="20" height="20">
-  <object name="Treasure" type="treasure" gid="81" x="150" y="148" width="32" height="32">
+  <object name="Treasure" type="treasure" gid="81" x="531" y="355" width="32" height="32">
    <properties>
     <property name="open" value="false"/>
     <property name="opengid" value="82"/>
@@ -52,15 +52,25 @@
     <property name="speed" value="10"/>
    </properties>
   </object>
-  <object name="Treasure" type="treasure" gid="81" x="150" y="148" width="32" height="32">
+  <object name="Black Dude" type="guard" gid="261" x="356" y="126" width="32" height="32">
    <properties>
-    <property name="open" value="false"/>
-    <property name="opengid" value="82"/>
+    <property name="speed" value="2"/>
    </properties>
   </object>
-  <object name="Black Dude" type="guard" gid="261" x="356" y="126" width="32" height="32"/>
-  <object name="Something" type="guard" gid="281" x="564" y="146" width="32" height="32"/>
-  <object name="Something" type="guard" gid="281" x="507" y="96" width="32" height="32"/>
-  <object name="Something" type="guard" gid="281" x="529" y="237" width="32" height="32"/>
+  <object name="Something" type="guard" gid="281" x="564" y="146" width="32" height="32">
+   <properties>
+    <property name="speed" value="2"/>
+   </properties>
+  </object>
+  <object name="Something" type="guard" gid="281" x="507" y="96" width="32" height="32">
+   <properties>
+    <property name="speed" value="2"/>
+   </properties>
+  </object>
+  <object name="Something" type="guard" gid="281" x="529" y="237" width="32" height="32">
+   <properties>
+    <property name="speed" value="2"/>
+   </properties>
+  </object>
  </objectgroup>
 </map>
