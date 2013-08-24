@@ -5,8 +5,10 @@
 
     var gameCanvas = document.createElement("canvas");
     gameCanvas.id = "game";
-    gameCanvas.width = 640;
-    gameCanvas.height = 480;
+    function updateWidth() {
+        gameCanvas.width = $(window).width();
+        gameCanvas.height = $(window).height();
+    }
 
     function loadTileset(tileset) {
         var img = new Image();
@@ -89,8 +91,8 @@
                         txy.y * tileset.tileheight,
                         tileset.tilewidth,
                         tileset.tileheight,
-                        xy.x * this.tilewidth,
-                        xy.y * this.tileheight,
+                        Math.floor(xy.x * this.tilewidth),
+                        Math.floor(xy.y * this.tileheight),
                         tileset.tilewidth,
                         tileset.tileheight);
                 }
@@ -109,8 +111,8 @@
                     txy.y * tileset.tileheight,
                     tileset.tilewidth,
                     tileset.tileheight,
-                    entity.x - (entity.width / 2),
-                    entity.y - (entity.height / 2),
+                    Math.floor(entity.x - (entity.width / 2)),
+                    Math.floor(entity.y - (entity.height / 2)),
                     tileset.tilewidth,
                     tileset.tileheight);
             }
@@ -162,6 +164,11 @@
         var player = {};
         var treasure = {};
         var guards = [];
+
+        var camera = {
+            offx: 0,
+            offy: 0
+        }
 
         function prepareEntity(entity, map) {
             entity.map = map;
@@ -388,6 +395,11 @@
         }
 
         function processLogic(dt) {
+            /* Update camera */
+            var toFollow = player;
+            camera.offx = (gameCanvas.width / 2) - toFollow.x;
+            camera.offy = (gameCanvas.height / 2) - toFollow.y
+
             player.update(dt);
             _.each(guards, function (guard) {
                 guard.update(dt);
@@ -417,6 +429,11 @@
         }
         
         function renderGame() {
+            gameCanvas.width = gameCanvas.width;
+            
+            ctx.save();
+            ctx.translate(camera.offx, camera.offy);
+
             map.drawTileLayer(bgLayer, ctx);
             map.drawEntity(treasure, ctx);
             _.each(guards, function (guard) {
@@ -424,6 +441,8 @@
             });
 
             map.drawEntity(player, ctx);
+
+            ctx.restore();
         }
 
         loadEntities(entLayer);
@@ -446,8 +465,8 @@
             }
 
             var offset = $(gameCanvas).offset();
-            x = ev.pageX - offset.left;
-            y = ev.pageY - offset.top;
+            x = ev.pageX - offset.left - camera.offx;
+            y = ev.pageY - offset.top - camera.offy;
 
             player.setTarget(x, y);
 
@@ -495,11 +514,12 @@
     }
 
     $(document).ready(function () {
-
         $(document).on("touchmove", function(e) {
             e.preventDefault();
         }, false);
         changeLevel("demo.json");
-
     });
+
+    $(window).on("resize", updateWidth);
+    updateWidth();
 }());
