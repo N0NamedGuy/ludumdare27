@@ -161,6 +161,7 @@
 
         var player = {};
         var treasure = {};
+        var guards = [];
 
         function prepareEntity(entity, map) {
             entity.map = map;
@@ -251,10 +252,16 @@
                 return obj.type === "treasure";
             });
 
-            console.log(treasure);
+            var guards_ = _.select(layer.objects, function (obj) {
+                return obj.type === "guard";
+            });
 
             player = prepareEntity(player, map);
             treasure = prepareEntity(treasure, map);
+
+            guards = _.map(guards_, function (guard) {
+                return prepareEntity(guard, map);
+            });
         }
 
         function processInput(dt) {
@@ -285,11 +292,23 @@
             } else {
                 $("#debug").html("No collision");
             }
+
+            var guards_ = _.filter(guards, function (guard) {
+                return player.collide(guard);
+            }); 
+
+            if (guards_.length > 0) {
+                $("#debug").html("Caught by a guard!");
+            }
         }
         
         function renderGame() {
             map.drawTileLayer(bgLayer, ctx);
             map.drawEntity(treasure, ctx);
+            _.each(guards, function (guard) {
+                map.drawEntity(guard, ctx);
+            });
+
             map.drawEntity(player, ctx);
         }
 
