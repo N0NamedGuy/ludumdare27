@@ -47,20 +47,21 @@
         });
     }
 
-    function drawLayer(map, layer, ctx) {
-        function findTileset(map, gid) {
-            var tilesets = _.filter(map.tilesets, function (tileset) {
-                return gid >= tileset.firstgid;
-            });
+    function findTileset(map, gid) {
+        var tilesets = _.filter(map.tilesets, function (tileset) {
+            return gid >= tileset.firstgid;
+        });
 
-            if (tilesets.length === 0) {
-                return undefined;
-            }
-
-            return _.max(tilesets, function (tileset) {
-                return tileset.firstgid;
-            });
+        if (tilesets.length === 0) {
+            return undefined;
         }
+
+        return _.max(tilesets, function (tileset) {
+            return tileset.firstgid;
+        });
+    }
+
+    function drawTileLayer(map, layer, ctx) {
 
         for (var i = 0; i < layer.data.length; i++) {
             var gid = layer.data[i];
@@ -87,39 +88,73 @@
         }
     }
 
+    function getLayer(map, name) {
+        return _.find(map.layers, function (layer) {
+            return layer.name === name;
+        });
+    }
 
-    function drawMap(map, ctx) {
-        function getLayer(map, name) {
-            return _.find(map.layers, function (layer) {
-                return layer.name === name;
+    function drawEntity(map, entity, ctx) {
+        var gid = entity.gid;
+        var tileset = findTileset(map, gid);
+        if (tileset) {
+            var txy = toXY(gid - tileset.firstgid, {
+                width: tileset.imagewidth / tileset.tilewidth,
+                height: tileset.imageheight / tileset.tileheight
             });
+
+            ctx.drawImage(tileset.img,
+                txy.x * tileset.tilewidth,
+                txy.y * tileset.tileheight,
+                tileset.tilewidth,
+                tileset.tileheight,
+                entity.x,
+                entity.y,
+                tileset.tilewidth,
+                tileset.tileheight);
         }
-
-        var bgLayer = getLayer(map, "background");
-        var entityLayer = getLayer(map, "entities");
-
-        drawLayer(map, bgLayer, ctx);
-        console.log("drawing ent layer");
-        drawLayer(map, entityLayer, ctx);
     }
 
     $("div#container").append(gameCanvas);
 
-    function mainloop(map) {
-        function mainloop_() {
-            var ctx = gameCanvas.getContext('2d');
-            drawMap(map, ctx);
-//            window.requestAnimationFrame(mainloop(map));
+    function playGame(map) {
+        // Preload some stuff, so we don't need to ask everytime where stuff is
+        var ctx = gameCanvas.getContext('2d');
+        var bgLayer = getLayer(map, "background");
+        var entLayer = getLayer(map, "entities");
+
+        var player = {
+            x: 0,
+            y: 0
         }
 
-        return mainloop_;
+        function loadEntities(layer) {
+            player = _.find(layer.objects, function (obj) {
+                return obj.type === "player";
+            });
+            console.log(player);
+        }
+        
+        function renderGame() {
+            drawTileLayer(map, bgLayer, ctx);
+            drawEntity(map, player, ctx);
+        }
+
+        loadEntities(entLayer);
+
+        function mainloop() {
+            renderGame();
+            window.requestAnimationFrame(mainloop);
+        }
+
+        mainloop();
     }
 
     $(document).ready(function () {
         $.getJSON("maps/demo.json", function (json) {
             loadMap(json, function (map) {
                 console.log("Map loaded");
-                window.requestAnimationFrame(mainloop(map));
+                playGame(map);
             });
         });
     });
