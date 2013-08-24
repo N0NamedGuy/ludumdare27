@@ -168,20 +168,33 @@
             // The origin of every entity is at its center
             entity.x += entity.width / 2;
             entity.y -= entity.height / 2;
-            entity.target = {
-                x: entity.x,
-                y: entity.y
-            }
+            entity.target = undefined;
 
             entity._update = function (dt) {
+                if (this.target === undefined) {
+                    return;
+                }
                 var speed = this.properties.speed;
-                var angle = Math.atan2(this.target.y - this.y,
-                       this.target.x - this.x);
+
+                var tx = this.target.x;
+                var ty = this.target.y;
+
+                var angle = Math.atan2(ty - this.y, tx - this.x);
 
                 var nx = this.x + speed * Math.cos(angle) * dt;
                 var ny = this.y + speed * Math.sin(angle) * dt;
 
                 this.moveTo(nx, ny);
+
+                var sdt = speed * dt;
+
+                if ((
+                    this.x > (tx - sdt) && this.x < (tx + sdt) &&
+                    this.y > (ty - sdt) && this.y < (ty + sdt)
+                )) {
+
+                   this.target = undefined;
+                }
             }
 
             entity.update = function (dt) {
@@ -212,8 +225,7 @@
             }
 
             entity.setTarget = function (x, y) {
-                this.target.x = x;
-                this.target.y = y;
+                this.target = {x: x, y: y};
             }
 
             entity.collide = function (other) {
