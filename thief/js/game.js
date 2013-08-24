@@ -142,6 +142,7 @@
 
     function playGame(map) {
         // Preload some stuff, so we don't need to ask everytime where stuff is
+        var quit = false;
         var ctx = gameCanvas.getContext('2d');
         var bgLayer = map.getLayer("background");
         var entLayer = map.getLayer("entities");
@@ -167,8 +168,23 @@
             // The origin of every entity is at its center
             entity.x += entity.width / 2;
             entity.y -= entity.height / 2;
+            entity.start = {
+                x: entity.x,
+                y: entity.y
+            }
             entity.target = undefined;
             entity.wallHit = false;
+
+            entity._reset = function () {
+                this.x = this.start.x;
+                this.y = this.start.y;
+                this.target = undefined;
+                this.wallHit = false;
+            }
+
+            entity.reset = function () {
+                this._reset();
+            }
 
             entity._update = function (dt) {
                 if (this.target === undefined) {
@@ -261,8 +277,10 @@
             return entity;
         }
 
-        function prepareGuard(entity) {
-            entity.update = function (dt) {
+        function prepareGuard(entity, map) {
+            var guard = prepareEntity(entity, map);
+
+            guard.update = function (dt) {
                 if (this.target === undefined || this.hasHitWall()) {
                     var dir = Math.floor(Math.random() * 4);
                     var amt = Math.floor(Math.random() * 200);
@@ -286,7 +304,39 @@
                 this._update(dt);
             }
 
-            return entity;
+            return guard;
+        }
+
+        function preparePlayer(entity, map) {
+            var player = prepareEntity(entity, map);
+
+            player.reset = function () {
+                this.treasures = 0;
+                this._reset();
+            }
+
+            player.reset();
+            return player;
+        }
+
+        function prepareTreasure(entity, map) {
+            var treasure = prepareEntity(entity, map);
+            treasure.isOpen = false;
+            treasure.properties.closedgid = treasure.gid;
+            
+            treasure.reset = function () {
+                this.isOpen = false;
+                this.gid = treasure.properties.closedgid;
+                this._reset();
+            }
+
+            treasure.open = function (player) {
+                if (this.isOpen) return;
+                this.gid = this.properties.opengid;
+                player.treasures = 1;
+                this.isOeon = true;
+            }
+            return treasure;
         }
 
         function loadEntities(layer) {
@@ -302,11 +352,19 @@
                 return obj.type === "guard";
             });
 
-            player = prepareEntity(player, map);
-            treasure = prepareEntity(treasure, map);
+            player = preparePlayer(player, map);
+            treasure = prepareTreasure(treasure, map);
 
             guards = _.map(guards_, function (guard) {
-                return prepareGuard(prepareEntity(guard, map));
+                return prepareGuard(guard, map);
+            });
+        }
+
+        function restartLevel(layer) {
+            player.reset();
+            treasure.reset();
+            _.each(guards, function (guard) {
+                guard.reset();
             });
         }
 
@@ -336,19 +394,26 @@
             });
 
             if (player.collide(treasure)) {
-                treasure.gid = treasure.properties.opengid;
-                $("#debug").html("Treasure collision");
-            } else {
-                $("#debug").html("No collision");
+                treasure.open(player);
             }
-
+            
+            /* Check if any guard hit the thief */
             var guards_ = _.filter(guards, function (guard) {
                 return player.collide(guard);
             }); 
 
             if (guards_.length > 0) {
-                $("#debug").html("Caught by a guard!");
+                restartLevel();
+                return;
             }
+
+            /* Check if thief is on exit */
+            var props = map.getTileProps(bgLayer, player.x, player.y);
+            if (props && props.isexit && props.isexit === "true") {
+                $("#debug").html("you're exiting with " + player.treasures + " treasures!");
+                quit = true;
+                changeLevel(map.properties.nextmap);
+            };
         }
         
         function renderGame() {
@@ -406,23 +471,20 @@
             renderGame();
 
             lastUpdate = new Date().getTime();
-            if (window.requestAnimationFrame) {
-                window.requestAnimationFrame(mainloop);
-            } else {
-                window.setTimeout(mainloop, 1000 / 60);
+            if (!quit) {
+                if (window.requestAnimationFrame) {
+                    window.requestAnimationFrame(mainloop);
+                } else {
+                    window.setTimeout(mainloop, 1000 / 60);
+                }
             }
         }
 
         mainloop();
     }
 
-    $(document).ready(function () {
-
-        $(document).on("touchmove", function(e) {
-            e.preventDefault();
-        }, false);
-
-        $.getJSON("maps/demo.json", function (json) {
+    function changeLevel(filename) {
+        $.getJSON("maps/" + filename, function (json) {
             loadMap(json, function (map) {
                 console.log("Map loaded");
                 
@@ -430,6 +492,14 @@
                 playGame(newMap);
             });
         });
+    }
+
+    $(document).ready(function () {
+
+        $(document).on("touchmove", function(e) {
+            e.preventDefault();
+        }, false);
+        changeLevel("demo.json");
 
     });
 }());
