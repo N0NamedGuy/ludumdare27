@@ -8,7 +8,6 @@
     gameCanvas.width = 640;
     gameCanvas.height = 480;
 
-
     function loadTileset(tileset) {
         var img = new Image();
         var deferred = $.Deferred();
@@ -47,18 +46,18 @@
         };
     }
 
-    function fromXY(x, y, width) {
-        return y * width + x;
+    function fromXY(x, y, th, tw, width) {
+        return (Math.floor(y / th) * width) + Math.floor(x / tw);
     }
 
-    function appendMapMethods(map) {
+    function prepareMap(map) {
 
         map.toXY = function (index) {
             return toXY(index, this.width);
         };
 
         map.fromXY = function (x, y) {
-            return toXY(x, y, this.width);
+            return fromXY(x, y, this.tilewidth, this.tileheight, this.width);
         };
 
         map.findTileset = function(gid) {
@@ -111,8 +110,8 @@
                     txy.y * tileset.tileheight,
                     tileset.tilewidth,
                     tileset.tileheight,
-                    entity.x,
-                    entity.y,
+                    entity.x - 16,
+                    entity.y - 16,
                     tileset.tilewidth,
                     tileset.tileheight);
             }
@@ -122,6 +121,20 @@
             return _.find(this.layers, function (layer) {
                 return layer.name === name;
             });
+        };
+
+        // Returns tile properties
+        map.getTileProps = function(layer, x, y) {
+            var index = this.fromXY(x, y); 
+            var gid = layer.data[index];
+
+            if (!gid) return null;
+            var tileset = this.findTileset(gid);
+            if (!tileset) return null;
+            gid -= tileset.firstgid;
+
+            var props = tileset.tileproperties;
+            return props[gid];
         };
 
         return map;
@@ -145,8 +158,12 @@
 
             player.map = map;
             player.moveTo = function (x, y) {
-                var tileIndex = fromXY(x, y, map);
-
+                var props = this.map.getTileProps(bgLayer, x, y);
+                
+                if (props && props.walkable === "true") {
+                    this.x = x;
+                    this.y = y;
+                }
             };
         }
         
@@ -157,22 +174,62 @@
 
         loadEntities(entLayer);
 
+        $(gameCanvas).on("touchend", function (e) {
+            var x;
+            var y;
+            var ev;
+            e.preventDefault();
+
+            if (e.type === "click") {
+                ev = e;
+            } else if (e.type == "touchend") {
+                var touches = e.originalEvent.changedTouches;
+                if (touches.length != 1) {
+                    return false;
+                }
+                var touch = touches[0];
+
+                console.log("Touchend event up in this bitch");
+                console.log(touch);
+
+                ev = touch;
+            }
+
+            var offset = $(gameCanvas).offset();
+            x = ev.pageX - offset.left;
+            y = ev.pageY - offset.top;
+
+            player.moveTo(x,y);
+            return false;
+
+        });
+
         function mainloop() {
             renderGame();
-            window.requestAnimationFrame(mainloop);
+            if (window.requestAnimationFrame) {
+                window.requestAnimationFrame(mainloop);
+            } else {
+                window.setTimeout(mainloop, 1000 / 60);
+            }
         }
 
         mainloop();
     }
 
     $(document).ready(function () {
+
+        $(document).on("touchmove", function(e) {
+            e.preventDefault();
+        }, false);
+
         $.getJSON("maps/demo.json", function (json) {
             loadMap(json, function (map) {
                 console.log("Map loaded");
                 
-                var newMap = appendMapMethods(map);
+                var newMap = prepareMap(map);
                 playGame(newMap);
             });
         });
+
     });
 }());
