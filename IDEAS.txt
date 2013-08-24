@@ -1,0 +1,21 @@
+Theme: 10 seconds
+
+IDEAS:
+  * Thief sneaks in. Steals treasure. Has 10 seconds to run away.
+    - Levels are heavily guarded.
+    - Bad guys everywhere.
+    - Twitch movement.
+    - Thief can't attack, only defend.
+    - Genres:
+      * A top-down 2D game would work well here.
+
+  * Survive by adding 10 seconds each time.
+    - Collect an item, more 10 seconds to live
+    - Fail to get those items, dead.
+    - Genres:
+      * A runner would fit well here.
+      * A space shooter would fit well.
+
+  * Solve a puzzle in 10 seconds.
+  * Minigame collection.
+    - You have 10 seconds to win each minigame
