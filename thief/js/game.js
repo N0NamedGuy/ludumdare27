@@ -3,9 +3,7 @@
 (function Game() {
     "use strict";
 
-
-    var gameCanvas = document.createElement("canvas"),
-        ctx = gameCanvas.getContext('2d');
+    var gameCanvas = document.createElement("canvas");
     gameCanvas.id = "game";
     gameCanvas.width = 640;
     gameCanvas.height = 480;
@@ -25,14 +23,15 @@
         var img = new Image();
         var deferred = $.Deferred();
 
-        $(img).on("load", function () {
+        img.onload = function () {
+            console.log("Image loaded");
             deferred.resolve();
-        });
+        };
 
         img.src = tileset.image;
         tileset.img = img;
 
-        deferred.promise();
+        return deferred.promise();
     }
 
     function loadMap(json, callback) {
@@ -80,10 +79,21 @@
 
     $("div#container").append(gameCanvas);
 
+    function mainloop(map) {
+        function mainloop_() {
+            var ctx = gameCanvas.getContext('2d');
+            drawMap(map, ctx);
+            window.requestAnimationFrame(mainloop(map));
+        }
+
+        return mainloop_;
+    }
+
     $(document).ready(function () {
         $.getJSON("maps/demo.json", function (json) {
             loadMap(json, function (map) {
-                drawMap(map, ctx);
+                console.log("Map loaded");
+                window.requestAnimationFrame(mainloop(map));
             });
         });
     });
