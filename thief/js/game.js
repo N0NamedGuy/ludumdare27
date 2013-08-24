@@ -140,6 +140,7 @@
         return map;
     }
 
+
     function playGame(map) {
         // Preload some stuff, so we don't need to ask everytime where stuff is
         var ctx = gameCanvas.getContext('2d');
@@ -163,18 +164,32 @@
             y: 0
         };
 
-        function loadEntities(layer) {
-            player = _.find(layer.objects, function (obj) {
-                return obj.type === "player";
-            });
+        function prepareEntity(entity, map) {
+            entity.map = map;
+            // The origin of every entity is at its center
+            entity.x += entity.width / 2;
+            entity.y -= entity.height / 2;
+            entity.target = {
+                x: entity.x,
+                y: entity.y
+            }
 
-            player.map = map;
-            // The origin of the player is at its center
-            player.x += player.width / 2;
-            player.y -= player.height / 2;
+            entity._update = function (dt) {
+                var speed = this.properties.speed;
+                var angle = Math.atan2(this.target.y - this.y,
+                       this.target.x - this.x);
 
-            console.log(player.y);
-            player.moveTo = function (x, y) {
+                var nx = this.x + speed * Math.cos(angle) * dt;
+                var ny = this.y + speed * Math.sin(angle) * dt;
+
+                this.moveTo(nx, ny);
+            }
+
+            entity.update = function (dt) {
+                this._update(dt);
+            }
+
+            entity.moveTo = function (x, y) {
                 var props = this.map.getTileProps(bgLayer, x, y);
                 
                 if (props && props.walkable === "true") {
@@ -186,7 +201,7 @@
                 }
             };
 
-            player.moveRelative = function (x, y) {
+            entity.moveRelative = function (x, y) {
                 var properties;
                 var speed = 1.0;
                 
@@ -194,9 +209,23 @@
                 if (properties && properties.speed) {
                     speed = properties.speed;
                 }
-                return this.moveTo(player.x + (x * speed), player.y + (y * speed));
+                this.setTarget(this.x + (x * speed), this.y + (y * speed));
             }
 
+            entity.setTarget = function (x, y) {
+                this.target.x = x;
+                this.target.y = y;
+            }
+
+            return entity;
+        }
+
+        function loadEntities(layer) {
+            player = _.find(layer.objects, function (obj) {
+                return obj.type === "player";
+            });
+
+            player = prepareEntity(player, map);
         }
 
         function processInput(dt) {
@@ -213,7 +242,13 @@
                 dy = 1;
             }
 
-            player.moveRelative(dx * dt, dy * dt);
+            if (dx != 0 || dy != 0) {
+                player.moveRelative(dx * dt, dy * dt);
+            }
+        }
+
+        function processLogic(dt) {
+            player.update(dt);
         }
         
         function renderGame() {
@@ -223,13 +258,13 @@
 
         loadEntities(entLayer);
 
-        $(gameCanvas).on("click touchend", function (e) {
+        $(gameCanvas).on("mouseup touchend", function (e) {
             var x;
             var y;
             var ev;
             e.preventDefault();
 
-            if (e.type === "click") {
+            if (e.type === "mouseup") {
                 ev = e;
             } else if (e.type == "touchend") {
                 var touches = e.originalEvent.changedTouches;
@@ -237,7 +272,6 @@
                     return false;
                 }
                 var touch = touches[0];
-
                 ev = touch;
             }
 
@@ -245,9 +279,9 @@
             x = ev.pageX - offset.left;
             y = ev.pageY - offset.top;
 
-            player.moveTo(x,y);
-            return false;
+            player.setTarget(x, y);
 
+            return false;
         });
 
         $(window).on("keydown keyup", function (e) {
@@ -255,12 +289,18 @@
             if (action) {
                 actions[action] = (e.type == "keydown");
             }
-
         });
 
+        var lastUpdate = new Date().getTime();
         function mainloop() {
-            processInput(1.0);
+            var curTime = new Date().getTime();
+            var dt = (curTime - lastUpdate) / 60;
+
+            processInput(dt);
+            processLogic(dt);
             renderGame();
+
+            lastUpdate = new Date().getTime();
             if (window.requestAnimationFrame) {
                 window.requestAnimationFrame(mainloop);
             } else {
