@@ -770,7 +770,7 @@ if (typeof String.prototype.startsWith != 'function') {
         
         var levelName = getParameterByName("map");
         if (levelName === "") {
-            levelName = "intro.json";
+            levelName = "title.json";
         }
 
         changeLevel(levelName);
