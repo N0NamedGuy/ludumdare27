@@ -656,12 +656,26 @@
             });
         });
     }
+    
+    // From: http://stackoverflow.com/a/901144
+    function getParameterByName(name) {
+        name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+            results = regex.exec(location.search);
+        return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
 
     $(document).ready(function () {
         $(document).on("touchmove", function(e) {
             e.preventDefault();
         }, false);
-        changeLevel("intro.json");
+        
+        var levelName = getParameterByName("map");
+        if (levelName === "") {
+            levelName = "intro.json";
+        }
+
+        changeLevel(levelName);
     });
 
     $(window).on("resize", updateWidth);
