@@ -670,7 +670,6 @@ if (typeof String.prototype.startsWith != 'function') {
         $(gameCanvas).on("touchmove touchend touchstart", function (e) {
             e.preventDefault();
 
-            $(gameCanvas).off("mouseup mousedown mousemove");
             var touches = e.originalEvent.changedTouches;
             if (touches.length != 1) {
                 return false;
