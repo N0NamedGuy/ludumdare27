@@ -9,9 +9,12 @@
 
     gameCanvas.id = "game";
     function updateWidth() {
-        framebuffer.width = gameCanvas.width = window.innerWidth;
-        framebuffer.height = gameCanvas.height = window.innerHeight;
+        framebuffer.width = gameCanvas.width = Math.min(640, window.innerWidth);
+        framebuffer.height = gameCanvas.height = Math.min(480, window.innerHeight);
+
+        $(gameCanvas).css("left", (window.innerWidth - gameCanvas.width) / 2);
     }
+    updateWidth();
 
     function loadTileset(tileset) {
         var img = new Image();
@@ -215,6 +218,7 @@
         var countdown = {
             startTime: undefined,
             failed: false,
+            remaining: 0,
 
             reset: function () {
                 this.startTime = undefined;
@@ -239,9 +243,12 @@
                     (cents < 10 ? "0" : "") + cents; 
 
                 if (diff <= 0) {
+                    diff = 0;
                     this.failed = true;
                     this.str = "00:00:00";
                 }
+
+                this.remaining = diff;
             },
 
             render: function (ctx) {
@@ -249,7 +256,7 @@
 
                 ctx.save();
                 ctx.font = "20pt monospace";
-                ctx.strokeText(this.str, 50, 50);
+                ctx.fillText(this.str, 50, 50);
                 ctx.restore();
             }
         };
@@ -535,7 +542,14 @@
 
         function processLogic(dt) {
             /* Update camera */
-            var toFollow = player;
+            var toFollow = {
+                x: player.x,
+                y: player.y
+            };
+            var remaining = countdown.remaining;
+            toFollow.x += (Math.sin(remaining) * 16);
+            toFollow.y += (Math.cos(remaining) * 16);
+
 
             // Thanks Aru!
             if (camera.tempx && camera.tempx) {
@@ -591,6 +605,7 @@
             
             fbCtx.save();
             fbCtx.translate(Math.floor(camera.offx), Math.floor(camera.offy));
+            // TODO: add zoom to correct viewports
 
             map.drawTileLayer(bgLayer, fbCtx);
             //map._drawTileLayer(aiLayer, fbCtx);
