@@ -157,9 +157,9 @@
     <property name="speed" value="10"/>
    </properties>
   </object>
-  <object name="Black Dude" type="guard" gid="261" x="350" y="288" width="32" height="32">
+  <object name="Black Dude" type="guard" gid="261" x="420" y="285" width="32" height="32">
    <properties>
-    <property name="aifollowdist" value="4"/>
+    <property name="aifollowdist" value="3"/>
     <property name="speed" value="6"/>
    </properties>
   </object>
