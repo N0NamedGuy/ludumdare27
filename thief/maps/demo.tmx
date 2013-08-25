@@ -3,7 +3,84 @@
  <properties>
   <property name="nextmap" value="the_end.json"/>
  </properties>
- <tileset firstgid="1" source="inside.tsx"/>
+ <tileset firstgid="1" name="inside" tilewidth="32" tileheight="32">
+  <image source="../tilesets/inside.png" width="640" height="400"/>
+  <tile id="21">
+   <properties>
+    <property name="walkable" value="true"/>
+   </properties>
+  </tile>
+  <tile id="25">
+   <properties>
+    <property name="walkable" value="true"/>
+   </properties>
+  </tile>
+  <tile id="29">
+   <properties>
+    <property name="walkable" value="true"/>
+   </properties>
+  </tile>
+  <tile id="64">
+   <properties>
+    <property name="aiorder" value="stop"/>
+   </properties>
+  </tile>
+  <tile id="65">
+   <properties>
+    <property name="aiorder" value="follow"/>
+    <property name="target" value="player"/>
+   </properties>
+  </tile>
+  <tile id="66">
+   <properties>
+    <property name="aiorder" value="rand"/>
+   </properties>
+  </tile>
+  <tile id="85">
+   <properties>
+    <property name="aiorder" value="up"/>
+   </properties>
+  </tile>
+  <tile id="104">
+   <properties>
+    <property name="airoder" value="left"/>
+   </properties>
+  </tile>
+  <tile id="105">
+   <properties>
+    <property name="aiorder" value="down"/>
+   </properties>
+  </tile>
+  <tile id="106">
+   <properties>
+    <property name="aiorder" value="right"/>
+   </properties>
+  </tile>
+  <tile id="120">
+   <properties>
+    <property name="isexit" value="true"/>
+    <property name="walkable" value="true"/>
+   </properties>
+  </tile>
+  <tile id="121">
+   <properties>
+    <property name="isexit" value="true"/>
+    <property name="walkable" value="true"/>
+   </properties>
+  </tile>
+  <tile id="140">
+   <properties>
+    <property name="isexit" value="true"/>
+    <property name="walkable" value="true"/>
+   </properties>
+  </tile>
+  <tile id="141">
+   <properties>
+    <property name="isexit" value="true"/>
+    <property name="walkable" value="true"/>
+   </properties>
+  </tile>
+ </tileset>
  <tileset firstgid="241" source="thief.tsx"/>
  <layer name="background" width="20" height="20">
   <data encoding="csv">
@@ -15,11 +92,35 @@
 0,0,23,10,10,10,10,10,22,23,0,0,0,0,0,23,22,22,22,23,
 0,0,23,22,22,30,30,30,30,23,0,0,0,0,0,23,22,22,22,23,
 0,0,41,42,42,42,42,3,30,23,0,0,1,2,2,43,22,22,22,23,
-0,0,0,0,0,0,0,21,30,23,0,0,21,30,30,30,30,30,30,23,
-0,0,0,0,0,0,0,21,30,49,10,10,51,30,4,4,4,4,30,23,
-0,0,0,0,0,0,0,21,30,30,30,30,30,30,30,30,30,30,30,23,
-0,0,0,0,0,0,0,49,50,50,50,50,50,50,50,50,50,50,50,43,
+5,6,6,6,6,6,7,21,30,23,0,0,21,30,30,30,30,30,30,23,
+27,26,26,26,26,26,27,21,30,49,10,10,51,30,4,4,4,4,30,23,
+27,26,30,30,30,26,27,21,30,30,30,30,30,30,30,30,30,30,30,23,
+25,26,30,30,30,26,27,49,50,50,50,50,50,50,50,50,50,50,50,43,
+25,26,26,26,26,26,25,0,0,0,0,0,0,0,0,0,0,0,0,0,
+45,46,46,46,46,46,47,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <layer name="ai" width="20" height="20">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,65,0,0,0,0,0,0,67,67,67,67,0,
+0,0,0,0,0,0,0,105,65,66,105,105,105,105,105,66,105,105,105,0,
+0,0,0,0,0,0,0,0,65,0,0,0,0,0,0,0,67,67,67,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,106,106,106,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,106,106,106,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,106,106,106,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,67,0,0,0,0,67,0,
+0,107,107,107,107,106,0,0,0,0,0,0,0,0,0,0,0,0,67,0,
+0,86,107,107,107,106,0,0,0,0,0,0,0,0,67,0,0,0,0,0,
+0,86,105,105,105,106,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,86,105,105,105,105,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -41,7 +142,7 @@
     <property name="speed" value="10"/>
    </properties>
   </object>
-  <object name="Black Dude" type="guard" gid="261" x="356" y="126" width="32" height="32">
+  <object name="Black Dude" type="guard" gid="261" x="586" y="224" width="32" height="32">
    <properties>
     <property name="speed" value="10"/>
    </properties>
@@ -56,9 +157,14 @@
     <property name="speed" value="10"/>
    </properties>
   </object>
-  <object name="Something" type="guard" gid="281" x="529" y="237" width="32" height="32">
+  <object name="Something" type="guard" gid="281" x="512" y="238" width="32" height="32">
    <properties>
     <property name="speed" value="10"/>
+   </properties>
+  </object>
+  <object name="Looper" type="guard" gid="281" x="95" y="391">
+   <properties>
+    <property name="speed" value="5"/>
    </properties>
   </object>
  </objectgroup>

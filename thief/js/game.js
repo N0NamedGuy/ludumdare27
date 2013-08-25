@@ -3,11 +3,14 @@
 (function Game() {
     "use strict";
 
+    var framebuffer = document.createElement("canvas");
     var gameCanvas = document.createElement("canvas");
+    var bgrender = document.createElement("canvas");
+
     gameCanvas.id = "game";
     function updateWidth() {
-        gameCanvas.width = $(window).width();
-        gameCanvas.height = $(window).height();
+        framebuffer.width = gameCanvas.width = window.innerWidth;
+        framebuffer.height = gameCanvas.height = window.innerHeight;
     }
 
     function loadTileset(tileset) {
@@ -53,6 +56,12 @@
 
     function prepareMap(map) {
 
+        var bgCanvas = document.createElement("canvas");
+        bgCanvas.width = map.width * map.tileheight;
+        bgCanvas.height = map.height * map.tilewidth;
+        bgCanvas.dirty = true;
+        map._bgCanvas = bgCanvas;
+
         map.toXY = function (index) {
             return toXY(index, this.width);
         };
@@ -75,7 +84,7 @@
             });
         };
 
-        map.drawTileLayer = function(layer, ctx) {
+        map._drawTileLayer = function(layer, ctx) {
             for (var i = 0; i < layer.data.length; i++) {
                 var gid = layer.data[i];
                 var xy = this.toXY(i);
@@ -99,9 +108,31 @@
             }
         };
 
-        map.drawEntity = function(entity, ctx) {
+        map.drawTileLayer = function (layer, ctx) {
+            var bgCanvas = map._bgCanvas;
+            var nctx = bgCanvas.getContext("2d");
+            if (bgCanvas.dirty) {
+                console.log("Dirty background. Redrawing...");
+                map._drawTileLayer(layer, nctx);
+                map._bgCanvas.dirty = false;
+            }
+            ctx.drawImage(bgCanvas, 0, 0);
+        }
+
+        map.drawEntity = function(entity, cam, ctx) {
+            if (entity.visible === false) {
+                return;
+            }
+
             var gid = entity.gid;
             var tileset = this.findTileset(gid);
+
+            var real_x = entity.x - cam.offx;
+            var real_y = entity.y - cam.offx;
+            var ew2 = entity.width / 2;
+            var eh2 = entity.height / 2;
+
+
             if (tileset) {
                 var txy = toXY(gid - tileset.firstgid, 
                     tileset.imagewidth / tileset.tilewidth);
@@ -111,8 +142,8 @@
                     txy.y * tileset.tileheight,
                     tileset.tilewidth,
                     tileset.tileheight,
-                    Math.floor(entity.x - (entity.width / 2)),
-                    Math.floor(entity.y - (entity.height / 2)),
+                    Math.floor(entity.x - ew2),
+                    Math.floor(entity.y - eh2),
                     tileset.tilewidth,
                     tileset.tileheight);
             }
@@ -145,8 +176,13 @@
     function playGame(map) {
         // Preload some stuff, so we don't need to ask everytime where stuff is
         var quit = false;
-        var ctx = gameCanvas.getContext('2d');
+        var outCtx = gameCanvas.getContext('2d');
+        var fbCtx = framebuffer.getContext('2d');
+        outCtx.mozImageSmoothingEnable = false;
+        fbCtx.mozImageSmoothingEnable = false;
+
         var bgLayer = map.getLayer("background");
+        var aiLayer = map.getLayer("ai");
         var entLayer = map.getLayer("entities");
         var actions = {
             "up": false,
@@ -287,26 +323,56 @@
         function prepareGuard(entity, map) {
             var guard = prepareEntity(entity, map);
 
-            guard.update = function (dt) {
-                if (this.target === undefined || this.hasHitWall()) {
-                    var dir = Math.floor(Math.random() * 4);
-                    var amt = Math.floor(Math.random() * 200);
-                    
-                    switch (dir) {
-                    case 0:
-                        this.setTarget(this.x + amt, this.y);
-                        break;
-                    case 1:
-                        this.setTarget(this.x - amt, this.y);
-                        break;
-                    case 2:
-                        this.setTarget(this.x, this.y + amt);
-                        break;
-                    case 3:
-                        this.setTarget(this.x, this.y - amt);
-                        break;
+            guard.order = "random";
+
+            guard.orders = {
+                random: function (ent, dt) {
+                    if (ent.target === undefined || ent.hasHitWall()) {
+                        var dir = Math.floor(Math.random() * 4);
+                        var amt = Math.floor(Math.random() * 200);
+                        
+                        switch (dir) {
+                        case 0:
+                            ent.setTarget(ent.x + amt, ent.y);
+                            break;
+                        case 1:
+                            ent.setTarget(ent.x - amt, ent.y);
+                            break;
+                        case 2:
+                            ent.setTarget(ent.x, ent.y + amt);
+                            break;
+                        case 3:
+                            ent.setTarget(ent.x, ent.y - amt);
+                            break;
+                        }
                     }
+                }, left : function (ent, dt) {
+                    ent.moveRelative(-dt, 0);
+                }, right: function (ent, dt) {
+                    ent.moveRelative(dt, 0);
+                }, up : function (ent, dt) {
+                    ent.moveRelative(0, -dt);
+                }, down: function (ent, dt) {
+                    ent.moveRelative(0, dt);
+                }, follow: function (ent, dt) {
+                    ent.setTarget(player.x, player.y);
+                }, stop: function (ent, dt) {
+                    console.log("Stopped"); 
                 }
+            }
+
+            guard.update = function (dt) {
+                var props = this.map.getTileProps(aiLayer, this.x, this.y);
+
+                if (props && props.aiorder) {
+                    this.order = props.aiorder;
+                }
+
+                var fun = this.orders[this.order];
+                if (fun) {
+                    fun(this, dt);
+                }
+
                 
                 this._update(dt);
             }
@@ -339,9 +405,10 @@
 
             treasure.open = function (player) {
                 if (this.isOpen) return;
-                this.gid = this.properties.opengid;
-                player.treasures = 1;
-                this.isOeon = true;
+                this.visible = false;
+                this.gid = 0;
+                player.treasures++;
+                this.isOpen = true;
             }
             return treasure;
         }
@@ -429,20 +496,22 @@
         }
         
         function renderGame() {
-            gameCanvas.width = gameCanvas.width;
+            framebuffer.width = framebuffer.width;
             
-            ctx.save();
-            ctx.translate(camera.offx, camera.offy);
+            fbCtx.save();
+            fbCtx.translate(Math.floor(camera.offx), Math.floor(camera.offy));
 
-            map.drawTileLayer(bgLayer, ctx);
-            map.drawEntity(treasure, ctx);
+            map.drawTileLayer(bgLayer, fbCtx);
+            map.drawEntity(treasure, camera, fbCtx);
             _.each(guards, function (guard) {
-                map.drawEntity(guard, ctx);
+                map.drawEntity(guard, camera, fbCtx);
             });
 
-            map.drawEntity(player, ctx);
-
-            ctx.restore();
+            map.drawEntity(player, camera, fbCtx);
+            fbCtx.restore();
+            
+            outCtx.clearRect(0, 0, screen.width, screen.height); 
+            outCtx.drawImage(framebuffer, 0, 0);
         }
 
         loadEntities(entLayer);
@@ -489,7 +558,7 @@
             processLogic(dt);
             renderGame();
 
-            lastUpdate = new Date().getTime();
+            lastUpdate = curTime;
             if (!quit) {
                 if (window.requestAnimationFrame) {
                     window.requestAnimationFrame(mainloop);
