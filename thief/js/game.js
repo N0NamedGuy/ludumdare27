@@ -323,10 +323,16 @@
         function prepareGuard(entity, map) {
             var guard = prepareEntity(entity, map);
 
-            guard.order = "random";
+            guard.order = "follow";
+
+            if (guard.properties.aiorder) {
+                guard.aiorder = "stop";
+            } else {
+                guard.aiorder = guard.properties.aiorder
+            }
 
             guard.orders = {
-                random: function (ent, dt) {
+                rand: function (ent, dt) {
                     if (ent.target === undefined || ent.hasHitWall()) {
                         var dir = Math.floor(Math.random() * 4);
                         var amt = Math.floor(Math.random() * 200);
@@ -346,6 +352,15 @@
                             break;
                         }
                     }
+                }, pause: function (ent, dt) {
+                    var curTime = new Date().getTime();
+                    if (ent.pauseTime === undefined) {
+                        ent.pauseTime = curTime;
+                    }
+
+                    if (curTime - ent.pauseTime > 1000) {
+                        ent.order = prevOrder; 
+                    }
                 }, left : function (ent, dt) {
                     ent.moveRelative(-dt, 0);
                 }, right: function (ent, dt) {
@@ -357,7 +372,6 @@
                 }, follow: function (ent, dt) {
                     ent.setTarget(player.x, player.y);
                 }, stop: function (ent, dt) {
-                    console.log("Stopped"); 
                 }
             }
 
@@ -365,15 +379,17 @@
                 var props = this.map.getTileProps(aiLayer, this.x, this.y);
 
                 if (props && props.aiorder) {
-                    this.order = props.aiorder;
+                    if (this.aiorder !== props.aiorder) {
+                        this.prevOrder = this.aiorder;
+                        this.aiorder = props.aiorder;
+                    }
                 }
 
-                var fun = this.orders[this.order];
-                if (fun) {
+                var fun = this.orders[this.aiorder];
+                if (fun !== undefined) {
                     fun(this, dt);
                 }
 
-                
                 this._update(dt);
             }
 
@@ -399,6 +415,7 @@
             
             treasure.reset = function () {
                 this.isOpen = false;
+                this.visible = true;
                 this.gid = treasure.properties.closedgid;
                 this._reset();
             }
@@ -406,7 +423,7 @@
             treasure.open = function (player) {
                 if (this.isOpen) return;
                 this.visible = false;
-                this.gid = 0;
+                this.gid = this.opengid;
                 player.treasures++;
                 this.isOpen = true;
             }
@@ -489,9 +506,10 @@
             /* Check if thief is on exit */
             var props = map.getTileProps(bgLayer, player.x, player.y);
             if (props && props.isexit && props.isexit === "true") {
-                $("#debug").html("you're exiting with " + player.treasures + " treasures!");
-                quit = true;
-                changeLevel(map.properties.nextmap);
+                if (player.treasures > 0) {
+                    quit = true;
+                    changeLevel(map.properties.nextmap);
+                }
             };
         }
         
@@ -502,6 +520,7 @@
             fbCtx.translate(Math.floor(camera.offx), Math.floor(camera.offy));
 
             map.drawTileLayer(bgLayer, fbCtx);
+            //map._drawTileLayer(aiLayer, fbCtx);
             map.drawEntity(treasure, camera, fbCtx);
             _.each(guards, function (guard) {
                 map.drawEntity(guard, camera, fbCtx);
@@ -586,7 +605,7 @@
         $(document).on("touchmove", function(e) {
             e.preventDefault();
         }, false);
-        changeLevel("demo.json");
+        changeLevel("intro.json");
     });
 
     $(window).on("resize", updateWidth);

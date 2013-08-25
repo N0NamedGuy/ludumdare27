@@ -36,6 +36,11 @@
     <property name="aiorder" value="rand"/>
    </properties>
   </tile>
+  <tile id="84">
+   <properties>
+    <property name="aiorder" value="pause"/>
+   </properties>
+  </tile>
   <tile id="85">
    <properties>
     <property name="aiorder" value="up"/>
@@ -43,7 +48,7 @@
   </tile>
   <tile id="104">
    <properties>
-    <property name="airoder" value="left"/>
+    <property name="aiorder" value="left"/>
    </properties>
   </tile>
   <tile id="105">
@@ -109,18 +114,18 @@
  <layer name="ai" width="20" height="20">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,65,0,0,0,0,0,0,67,67,67,67,0,
-0,0,0,0,0,0,0,105,65,66,105,105,105,105,105,66,105,105,105,0,
-0,0,0,0,0,0,0,0,65,0,0,0,0,0,0,0,67,67,67,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,106,106,106,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,106,106,106,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,106,106,106,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,106,106,106,106,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,106,106,106,106,0,
+0,0,0,0,0,0,0,67,0,105,105,105,105,105,105,105,105,105,105,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,86,86,86,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,86,86,86,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,86,86,86,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,86,86,86,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,67,0,0,0,0,67,0,
 0,107,107,107,107,106,0,0,0,0,0,0,0,0,0,0,0,0,67,0,
 0,86,107,107,107,106,0,0,0,0,0,0,0,0,67,0,0,0,0,0,
 0,86,105,105,105,106,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,86,105,105,105,105,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,86,86,86,86,105,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -137,7 +142,7 @@
     <property name="opengid" value="82"/>
    </properties>
   </object>
-  <object name="The Thief" type="player" gid="241" x="147" y="75" width="32" height="32">
+  <object name="The Thief" type="player" gid="241" x="28" y="63" width="32" height="32">
    <properties>
     <property name="speed" value="10"/>
    </properties>
@@ -147,22 +152,7 @@
     <property name="speed" value="10"/>
    </properties>
   </object>
-  <object name="Something" type="guard" gid="281" x="564" y="146" width="32" height="32">
-   <properties>
-    <property name="speed" value="10"/>
-   </properties>
-  </object>
-  <object name="Something" type="guard" gid="281" x="507" y="96" width="32" height="32">
-   <properties>
-    <property name="speed" value="10"/>
-   </properties>
-  </object>
-  <object name="Something" type="guard" gid="281" x="512" y="238" width="32" height="32">
-   <properties>
-    <property name="speed" value="10"/>
-   </properties>
-  </object>
-  <object name="Looper" type="guard" gid="281" x="95" y="391">
+  <object name="Looper" type="guard" gid="281" x="44" y="315">
    <properties>
     <property name="speed" value="5"/>
    </properties>

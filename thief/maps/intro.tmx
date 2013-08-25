@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="20" height="20" tilewidth="32" tileheight="32">
+ <properties>
+  <property name="nextmap" value="demo.json"/>
+ </properties>
+ <tileset firstgid="1" name="inside" tilewidth="32" tileheight="32">
+  <image source="../tilesets/inside.png" width="640" height="400"/>
+  <tile id="21">
+   <properties>
+    <property name="walkable" value="true"/>
+   </properties>
+  </tile>
+  <tile id="25">
+   <properties>
+    <property name="walkable" value="true"/>
+   </properties>
+  </tile>
+  <tile id="29">
+   <properties>
+    <property name="walkable" value="true"/>
+   </properties>
+  </tile>
+  <tile id="64">
+   <properties>
+    <property name="aiorder" value="stop"/>
+   </properties>
+  </tile>
+  <tile id="65">
+   <properties>
+    <property name="aiorder" value="follow"/>
+    <property name="target" value="player"/>
+   </properties>
+  </tile>
+  <tile id="66">
+   <properties>
+    <property name="aiorder" value="rand"/>
+   </properties>
+  </tile>
+  <tile id="84">
+   <properties>
+    <property name="aiorder" value="pause"/>
+   </properties>
+  </tile>
+  <tile id="85">
+   <properties>
+    <property name="aiorder" value="up"/>
+   </properties>
+  </tile>
+  <tile id="104">
+   <properties>
+    <property name="aiorder" value="left"/>
+   </properties>
+  </tile>
+  <tile id="105">
+   <properties>
+    <property name="aiorder" value="down"/>
+   </properties>
+  </tile>
+  <tile id="106">
+   <properties>
+    <property name="aiorder" value="right"/>
+   </properties>
+  </tile>
+  <tile id="120">
+   <properties>
+    <property name="isexit" value="true"/>
+    <property name="walkable" value="true"/>
+   </properties>
+  </tile>
+  <tile id="121">
+   <properties>
+    <property name="isexit" value="true"/>
+    <property name="walkable" value="true"/>
+   </properties>
+  </tile>
+  <tile id="140">
+   <properties>
+    <property name="isexit" value="true"/>
+    <property name="walkable" value="true"/>
+   </properties>
+  </tile>
+  <tile id="141">
+   <properties>
+    <property name="isexit" value="true"/>
+    <property name="walkable" value="true"/>
+   </properties>
+  </tile>
+ </tileset>
+ <tileset firstgid="241" source="thief.tsx"/>
+ <tileset firstgid="541" name="inside" tilewidth="32" tileheight="32">
+  <image source="../tilesets/inside.png" width="640" height="400"/>
+  <tile id="21">
+   <properties>
+    <property name="walkable" value="true"/>
+   </properties>
+  </tile>
+  <tile id="25">
+   <properties>
+    <property name="walkable" value="true"/>
+   </properties>
+  </tile>
+  <tile id="29">
+   <properties>
+    <property name="walkable" value="true"/>
+   </properties>
+  </tile>
+  <tile id="64">
+   <properties>
+    <property name="aiorder" value="stop"/>
+   </properties>
+  </tile>
+  <tile id="65">
+   <properties>
+    <property name="aiorder" value="follow"/>
+    <property name="target" value="player"/>
+   </properties>
+  </tile>
+  <tile id="66">
+   <properties>
+    <property name="aiorder" value="rand"/>
+   </properties>
+  </tile>
+  <tile id="84">
+   <properties>
+    <property name="aiorder" value="pause"/>
+   </properties>
+  </tile>
+  <tile id="85">
+   <properties>
+    <property name="aiorder" value="up"/>
+   </properties>
+  </tile>
+  <tile id="104">
+   <properties>
+    <property name="aiorder" value="left"/>
+   </properties>
+  </tile>
+  <tile id="105">
+   <properties>
+    <property name="aiorder" value="down"/>
+   </properties>
+  </tile>
+  <tile id="106">
+   <properties>
+    <property name="aiorder" value="right"/>
+   </properties>
+  </tile>
+  <tile id="120">
+   <properties>
+    <property name="isexit" value="true"/>
+    <property name="walkable" value="true"/>
+   </properties>
+  </tile>
+  <tile id="121">
+   <properties>
+    <property name="isexit" value="true"/>
+    <property name="walkable" value="true"/>
+   </properties>
+  </tile>
+  <tile id="140">
+   <properties>
+    <property name="isexit" value="true"/>
+    <property name="walkable" value="true"/>
+   </properties>
+  </tile>
+  <tile id="141">
+   <properties>
+    <property name="isexit" value="true"/>
+    <property name="walkable" value="true"/>
+   </properties>
+  </tile>
+ </tileset>
+ <layer name="background" width="20" height="20">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,5,6,6,6,546,546,547,0,0,0,
+0,0,0,0,0,0,5,6,6,6,47,22,22,22,562,562,567,0,0,0,
+0,0,0,0,0,0,27,26,26,26,22,22,22,22,562,562,567,0,0,0,
+0,0,0,0,0,0,27,26,26,26,22,22,22,5,546,546,587,0,0,0,
+0,0,0,0,0,0,27,26,26,26,22,22,22,25,0,0,0,0,0,0,
+0,0,0,0,0,0,45,46,46,46,7,22,22,45,6,6,6,7,0,0,
+0,0,0,0,0,0,0,0,0,0,25,22,22,22,26,26,26,27,0,0,
+0,0,0,0,0,0,0,0,0,0,25,22,22,22,26,26,26,27,0,0,
+0,0,0,0,0,0,0,0,0,0,25,22,22,22,26,26,26,27,0,0,
+0,0,0,0,0,0,0,0,0,0,25,22,22,22,26,26,26,27,0,0,
+0,0,0,0,0,6,6,6,6,6,47,22,22,5,46,46,46,47,0,0,
+0,0,0,0,0,121,22,22,22,22,22,22,22,27,0,0,0,0,0,0,
+0,0,0,0,0,121,22,22,22,22,22,22,22,27,0,0,0,0,0,0,
+0,0,0,0,0,46,46,46,46,46,46,46,46,47,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <layer name="ai" width="20" height="20" opacity="0.55">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,107,107,107,647,646,0,0,0,0,
+0,0,0,0,0,0,0,107,107,107,107,86,106,105,645,645,0,0,0,0,
+0,0,0,0,0,0,0,86,0,0,0,0,106,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,86,105,105,105,105,106,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,86,106,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,86,107,107,107,107,106,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,86,0,0,0,0,106,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,86,0,0,0,0,106,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,86,106,105,105,105,105,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,86,105,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <objectgroup name="entities" width="20" height="20">
+  <object name="Treasure" type="treasure" gid="81" x="483" y="78" width="32" height="32">
+   <properties>
+    <property name="open" value="false"/>
+    <property name="opengid" value="0"/>
+   </properties>
+  </object>
+  <object name="The Thief" type="player" gid="241" x="202" y="403" width="32" height="32">
+   <properties>
+    <property name="speed" value="10"/>
+   </properties>
+  </object>
+  <object name="Black Dude" type="guard" gid="261" x="432" y="80" width="32" height="32">
+   <properties>
+    <property name="speed" value="10"/>
+   </properties>
+  </object>
+ </objectgroup>
+</map>
