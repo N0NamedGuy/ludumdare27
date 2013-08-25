@@ -1,5 +1,14 @@
 /* global Kinetic */
 /* jslint browser: true */
+
+/* From: http://stackoverflow.com/a/646643 */
+if (typeof String.prototype.startsWith != 'function') {
+  // see below for better implementation!
+  String.prototype.startsWith = function (str){
+    return this.indexOf(str) == 0;
+  };
+}
+
 (function Game() {
     "use strict";
 
@@ -24,6 +33,10 @@
             deferred.resolve();
         };
 
+        if (tileset.image.startsWith("../")) {
+            tileset.image = tileset.image.substring(3);
+            console.log(tileset.image);
+        }
         img.src = tileset.image;
         tileset.img = img;
 
@@ -203,8 +216,9 @@
             37: "left",
             40: "down",
             39: "right"
-
         };
+        var pointer = undefined;
+        var pointerDown = false;
 
         var player = {};
         var treasure = {};
@@ -538,6 +552,11 @@
             if (dx != 0 || dy != 0) {
                 player.moveRelative(dx * dt, dy * dt);
             }
+
+            if (pointer) {
+                player.setTarget(pointer.x, pointer.y);
+                if (!pointerDown) pointer = undefined;
+            }
         }
 
         function processLogic(dt) {
@@ -625,28 +644,41 @@
 
         loadEntities(entLayer);
 
-        $(gameCanvas).on("mouseup touchend", function (e) {
-            var x;
-            var y;
-            var ev;
+        function updatePointer(ev) {
+            var offset = $(gameCanvas).offset();
+            pointer = {
+                x: ev.pageX - offset.left - camera.offx,
+                y: ev.pageY - offset.top - camera.offy
+            };
+        }
+
+        $(gameCanvas).on("mousedown", function (e) {
+            e.preventDefault();
+            pointerDown = true;
+            updatePointer(e);
+            return false;
+        });
+        $(gameCanvas).on("mouseup", function (e) {
+            e.preventDefault();
+            pointerDown = false;
+            return false;
+        });
+        $(gameCanvas).on("mousemove", function (e) {
+            e.preventDefault();
+            if (pointerDown) updatePointer(e);
+            return false;
+        });
+
+        $(gameCanvas).on("touchmove touchend touchstart", function (e) {
             e.preventDefault();
 
-            if (e.type === "mouseup") {
-                ev = e;
-            } else if (e.type == "touchend") {
-                var touches = e.originalEvent.changedTouches;
-                if (touches.length != 1) {
-                    return false;
-                }
-                var touch = touches[0];
-                ev = touch;
+            $(gameCanvas).off("mouseup mousedown mousemove");
+            var touches = e.originalEvent.changedTouches;
+            if (touches.length != 1) {
+                return false;
             }
-
-            var offset = $(gameCanvas).offset();
-            x = ev.pageX - offset.left - camera.offx;
-            y = ev.pageY - offset.top - camera.offy;
-
-            player.setTarget(x, y);
+            var touch = touches[0];
+            updatePointer(touch);
 
             return false;
         });
