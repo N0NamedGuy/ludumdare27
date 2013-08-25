@@ -35,7 +35,6 @@ if (typeof String.prototype.startsWith != 'function') {
 
         if (tileset.image.startsWith("../")) {
             tileset.image = tileset.image.substring(3);
-            console.log(tileset.image);
         }
         img.src = tileset.image;
         tileset.img = img;
@@ -128,7 +127,6 @@ if (typeof String.prototype.startsWith != 'function') {
             var bgCanvas = map._bgCanvas;
             var nctx = bgCanvas.getContext("2d");
             if (bgCanvas.dirty) {
-                console.log("Dirty background. Redrawing...");
                 map._drawTileLayer(layer, nctx);
                 map._bgCanvas.dirty = false;
             }
@@ -716,8 +714,6 @@ if (typeof String.prototype.startsWith != 'function') {
     function changeLevel(filename) {
         $.getJSON("maps/" + filename, function (json) {
             loadMap(json, function (map) {
-                console.log("Map loaded");
-                
                 var newMap = prepareMap(map);
                 playGame(newMap);
             });
