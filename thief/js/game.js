@@ -205,15 +205,21 @@ if (typeof String.prototype.startsWith != 'function') {
             "right": false
         };
         var keys = {
+            // WASD
             87: "up",
             65: "left",
             83: "down",
             68: "right",
 
+            // Arrows
             38: "up",
             37: "left",
             40: "down",
             39: "right"
+
+            // ZQSD
+            90: "up",
+            81: "left"
         };
         var pointer = undefined;
         var pointerDown = false;
