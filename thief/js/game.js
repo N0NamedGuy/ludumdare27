@@ -280,10 +280,17 @@ if (typeof String.prototype.startsWith != 'function') {
             entity.y -= entity.height / 2;
             entity.start = {
                 x: entity.x,
-                y: entity.y
-            }
+                y: entity.y,
+                speed: 0
+            };
             entity.target = undefined;
             entity.wallHit = false;
+
+            if (entity.properties.speed) {
+                entity.start.speed = entity.speed = entity.properties.speed;
+            } else {
+                entity.start.speed = entity.speed = 0;
+            }
 
             entity._reset = function () {
                 this.x = this.start.x;
@@ -300,7 +307,7 @@ if (typeof String.prototype.startsWith != 'function') {
                 if (this.target === undefined) {
                     return;
                 }
-                var speed = this.properties.speed;
+                var speed = this.speed;
 
                 var tx = this.target.x;
                 var ty = this.target.y;
@@ -395,12 +402,24 @@ if (typeof String.prototype.startsWith != 'function') {
         function prepareGuard(entity, map) {
             var guard = prepareEntity(entity, map);
 
-            guard.order = "follow";
+            guard.isFollowing = false;
 
             if (guard.properties.aiorder) {
-                guard.aiorder = "stop";
-            } else {
                 guard.aiorder = guard.properties.aiorder
+            } else {
+                guard.aiorder = "stop";
+            }
+
+            if (guard.properties.aifollowdist) {
+                guard.aifollowdist= parseInt(guard.properties.aifollowdist);
+            } else {
+                guard.aifollowdist= 3;
+            }
+            
+            if (guard.properties.aifollowspeed) {
+                guard.aifollowspeed = parseInt(guard.properties.aifollowspeed);
+            } else {
+                guard.aifollowspeed = Math.floor(3 * (player.start.speed / 4));
             }
 
             guard.orders = {
@@ -449,15 +468,27 @@ if (typeof String.prototype.startsWith != 'function') {
 
             guard.update = function (dt) {
                 var props = this.map.getTileProps(aiLayer, this.x, this.y);
+                
+                // Check distance to player
+                var distX = Math.round(Math.abs(this.x - player.x) / map.tilewidth);
+                var distY = Math.round(Math.abs(this.y - player.y) / map.tileheight);
+                var dist = distX + distY; // Manhattan distance
+                var order = this.aiorder;
 
-                if (props && props.aiorder) {
+                if (this.aifollowdist> 0 && dist <= this.aifollowdist) {
+                    order = "follow";
+                    this.speed = this.aifollowspeed;
+
+                } else if (props && props.aiorder) {
+                    this.speed = this.start.speed;
                     if (this.aiorder !== props.aiorder) {
                         this.prevOrder = this.aiorder;
                         this.aiorder = props.aiorder;
+                        order = this.aiorder;
                     }
                 }
 
-                var fun = this.orders[this.aiorder];
+                var fun = this.orders[order];
                 if (fun !== undefined) {
                     fun(this, dt);
                 }

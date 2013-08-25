@@ -230,9 +230,10 @@
     <property name="speed" value="10"/>
    </properties>
   </object>
-  <object name="Black Dude" type="guard" gid="261" x="377" y="80" width="32" height="32">
+  <object name="Black Dude" type="guard" gid="261" x="386" y="214" width="32" height="32">
    <properties>
-    <property name="speed" value="10"/>
+    <property name="aifollowdistance" value="3"/>
+    <property name="speed" value="6"/>
    </properties>
   </object>
  </objectgroup>
