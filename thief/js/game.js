@@ -194,7 +194,13 @@
             87: "up",
             65: "left",
             83: "down",
-            68: "right"
+            68: "right",
+
+            38: "up",
+            37: "left",
+            40: "down",
+            39: "right"
+
         };
 
         var player = {};
