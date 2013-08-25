@@ -562,6 +562,7 @@
         });
 
         $(window).on("keydown keyup", function (e) {
+            e.preventDefault();
             var action = keys[e.keyCode];
             if (action) {
                 actions[action] = (e.type == "keydown");
