@@ -15,6 +15,7 @@ if (typeof String.prototype.startsWith != 'function') {
     var framebuffer = document.createElement("canvas");
     var gameCanvas = document.createElement("canvas");
     var bgrender = document.createElement("canvas");
+    var quit = false;
 
     gameCanvas.id = "game";
     function updateWidth() {
@@ -189,7 +190,7 @@ if (typeof String.prototype.startsWith != 'function') {
 
     function playGame(map) {
         // Preload some stuff, so we don't need to ask everytime where stuff is
-        var quit = false;
+        quit = false;
         var outCtx = gameCanvas.getContext('2d');
         var fbCtx = framebuffer.getContext('2d');
         outCtx.mozImageSmoothingEnable = false;
@@ -647,7 +648,6 @@ if (typeof String.prototype.startsWith != 'function') {
             var props = map.getTileProps(bgLayer, player.x, player.y);
             if (props && props.isexit && props.isexit === "true") {
                 if (player.treasures > 0) {
-                    quit = true;
                     changeLevel(map.properties.nextmap);
                 }
             };
@@ -746,10 +746,18 @@ if (typeof String.prototype.startsWith != 'function') {
         mainloop();
     }
 
-    function changeLevel(filename) {
+    function changeLevel(filename, callback) {
+        quit = true;
+        $(gameCanvas).fadeOut();
         $.getJSON("maps/" + filename, function (json) {
             loadMap(json, function (map) {
                 var newMap = prepareMap(map);
+
+                if (callback) {
+                    callback();
+                }
+
+                $(gameCanvas).fadeIn();
                 playGame(newMap);
             });
         });
@@ -773,7 +781,13 @@ if (typeof String.prototype.startsWith != 'function') {
             levelName = "title.json";
         }
 
-        changeLevel(levelName);
+        changeLevel(levelName, function () {
+            if (levelName !== "title.json") return;
+
+            window.setTimeout(function () {
+                changeLevel("intro.json");
+            }, 5000);
+        });
     });
 
     $(window).on("resize", updateWidth);
