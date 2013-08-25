@@ -618,8 +618,7 @@ if (typeof String.prototype.startsWith != 'function') {
         }
         
         function renderGame() {
-            framebuffer.width = framebuffer.width;
-            
+            fbCtx.clearRect(0, 0, framebuffer.width, framebuffer.height); 
             fbCtx.save();
             fbCtx.translate(Math.floor(camera.offx), Math.floor(camera.offy));
             // TODO: add zoom to correct viewports
