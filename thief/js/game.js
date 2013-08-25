@@ -204,7 +204,49 @@
         var camera = {
             offx: 0,
             offy: 0
-        }
+        };
+
+        var countdown = {
+            startTime: undefined,
+            failed: false,
+
+            reset: function () {
+                this.startTime = undefined;
+                this.failed = false;
+            },
+            
+            start: function () {
+                this.startTime = this.curTime = new Date().getTime();
+                this.failed = false;
+            },
+
+            update: function () {
+                if (!this.startTime) return;
+
+                var curTime = new Date().getTime();
+                var diff = (10000) - (curTime - this.startTime);
+
+                var secs = Math.floor(diff / 1000);
+                var cents = Math.floor(diff / 10) % 100;
+                this.str = "00:" + 
+                    (secs < 10 ? "0" : "") + secs + ":" +
+                    (cents < 10 ? "0" : "") + cents; 
+
+                if (diff <= 0) {
+                    this.failed = true;
+                    this.str = "00:00:00";
+                }
+            },
+
+            render: function (ctx) {
+                if (!this.startTime) return;
+
+                ctx.save();
+                ctx.font = "20pt monospace";
+                ctx.strokeText(this.str, 50, 50);
+                ctx.restore();
+            }
+        };
 
         function prepareEntity(entity, map) {
             entity.map = map;
@@ -426,6 +468,7 @@
                 this.gid = this.opengid;
                 player.treasures++;
                 this.isOpen = true;
+                countdown.start();
             }
             return treasure;
         }
@@ -457,6 +500,7 @@
             _.each(guards, function (guard) {
                 guard.reset();
             });
+            countdown.reset();
         }
 
         function processInput(dt) {
@@ -493,6 +537,14 @@
                 treasure.open(player);
             }
             
+            countdown.update();
+            
+            /* Check if timeout */
+            if (countdown.failed) {
+                restartLevel();
+                return;
+            }
+
             /* Check if any guard hit the thief */
             var guards_ = _.filter(guards, function (guard) {
                 return player.collide(guard);
@@ -511,6 +563,7 @@
                     changeLevel(map.properties.nextmap);
                 }
             };
+
         }
         
         function renderGame() {
@@ -528,7 +581,9 @@
 
             map.drawEntity(player, camera, fbCtx);
             fbCtx.restore();
-            
+
+            countdown.render(fbCtx);
+
             outCtx.clearRect(0, 0, screen.width, screen.height); 
             outCtx.drawImage(framebuffer, 0, 0);
         }
