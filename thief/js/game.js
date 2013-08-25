@@ -208,8 +208,8 @@
         var guards = [];
 
         var camera = {
-            offx: 0,
-            offy: 0
+            offx: undefined,
+            offy: undefined
         };
 
         var countdown = {
@@ -536,8 +536,17 @@
         function processLogic(dt) {
             /* Update camera */
             var toFollow = player;
-            camera.offx = (gameCanvas.width / 2) - toFollow.x;
-            camera.offy = (gameCanvas.height / 2) - toFollow.y
+
+            // Thanks Aru!
+            if (camera.tempx && camera.tempx) {
+                camera.tempx = ((camera.tempx * 5 + toFollow.x) / 6);
+                camera.tempy = ((camera.tempy * 5 + toFollow.y) / 6);
+            } else {
+                camera.tempx = toFollow.x;
+                camera.tempy = toFollow.y;
+            }
+            camera.offx = (gameCanvas.width / 2) - camera.tempx;
+            camera.offy = (gameCanvas.height / 2) - camera.tempy;
 
             player.update(dt);
             _.each(guards, function (guard) {
