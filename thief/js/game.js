@@ -303,15 +303,20 @@
             }
 
             entity.moveTo = function (x, y) {
-                var props = this.map.getTileProps(bgLayer, x, y);
+                var map = this.map;
+                var props = map.getTileProps(bgLayer, this.x, y);
                 
                 if (props && props.walkable === "true") {
-                    this.x = x;
                     this.y = y;
-                    return true;
-                } else {
-                    return false;
                 }
+                
+                props = map.getTileProps(bgLayer, x, this.y);
+                if (props && props.walkable === "true") {
+                    this.x = x;
+                }
+
+                props = map.getTileProps(bgLayer, x, y);
+                return props && props.walkable == "true";
             };
 
             entity.moveRelative = function (x, y) {
