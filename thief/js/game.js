@@ -215,7 +215,7 @@ if (typeof String.prototype.startsWith != 'function') {
             38: "up",
             37: "left",
             40: "down",
-            39: "right"
+            39: "right",
 
             // ZQSD
             90: "up",
