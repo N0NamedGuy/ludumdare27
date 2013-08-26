@@ -16,6 +16,7 @@ if (typeof String.prototype.startsWith != 'function') {
     var gameCanvas = document.createElement("canvas");
     var bgrender = document.createElement("canvas");
     var quit = false;
+    var alertImg = new Image();
 
     gameCanvas.id = "game";
     function updateWidth() {
@@ -161,6 +162,12 @@ if (typeof String.prototype.startsWith != 'function') {
                     Math.floor(entity.y - eh2),
                     tileset.tilewidth,
                     tileset.tileheight);
+
+                if (entity.alerted) {
+                    ctx.drawImage(alertImg,
+                        Math.floor(entity.x - ew2),
+                        Math.floor(entity.y - eh2) - map.tileheight);
+                }
             }
         };
 
@@ -187,6 +194,9 @@ if (typeof String.prototype.startsWith != 'function') {
         return map;
     }
 
+    function playAudio(audio) {
+        $("audio#" + audio)[0].play();
+    }
 
     function playGame(map) {
         // Preload some stuff, so we don't need to ask everytime where stuff is
@@ -238,6 +248,7 @@ if (typeof String.prototype.startsWith != 'function') {
             startTime: undefined,
             failed: false,
             remaining: 0,
+            lastsecs: 9,
 
             reset: function () {
                 this.startTime = undefined;
@@ -260,6 +271,11 @@ if (typeof String.prototype.startsWith != 'function') {
                 this.str = "00:" + 
                     (secs < 10 ? "0" : "") + secs + ":" +
                     (cents < 10 ? "0" : "") + cents; 
+
+                if (secs != this.lastsecs) {
+                    playAudio("blip");
+                    this.lastsecs = secs;
+                }
 
                 if (diff <= 0) {
                     diff = 0;
@@ -304,6 +320,7 @@ if (typeof String.prototype.startsWith != 'function') {
                 this.y = this.start.y;
                 this.target = undefined;
                 this.wallHit = false;
+                this.alerted = undefined;
             }
 
             entity.reset = function () {
@@ -484,6 +501,10 @@ if (typeof String.prototype.startsWith != 'function') {
 
                 if (this.aifollowdist> 0 && dist <= this.aifollowdist) {
                     order = "follow";
+                    if (!this.alerted) {
+                        playAudio("alert");
+                        this.alerted = true;
+                    }
                     this.speed = this.aifollowspeed;
 
                 } else if (props && props.aiorder) {
@@ -493,6 +514,7 @@ if (typeof String.prototype.startsWith != 'function') {
                         this.aiorder = props.aiorder;
                         order = this.aiorder;
                     }
+                    this.alerted = false;
                 }
 
                 var fun = this.orders[order];
@@ -509,9 +531,24 @@ if (typeof String.prototype.startsWith != 'function') {
         function preparePlayer(entity, map) {
             var player = prepareEntity(entity, map);
 
+            player.oldx = player.x;
+            player.oldy = player.y;
+
             player.reset = function () {
                 this.treasures = 0;
                 this._reset();
+            }
+
+            player.update = function(dt) {
+                this._update(dt);
+                
+                var diffx = Math.abs(this.x - this.oldx);
+                var diffy = Math.abs(this.y - this.oldy);
+                if (diffx + diffy > 10) {
+                    this.oldx = this.x;
+                    this.oldy = this.y;
+                    playAudio("step");
+                } 
             }
 
             player.reset();
@@ -536,6 +573,7 @@ if (typeof String.prototype.startsWith != 'function') {
                 this.gid = this.opengid;
                 player.treasures++;
                 this.isOpen = true;
+                playAudio("treasure");
                 countdown.start();
             }
             return treasure;
@@ -630,6 +668,7 @@ if (typeof String.prototype.startsWith != 'function') {
             
             /* Check if timeout */
             if (countdown.failed) {
+                playAudio("timeup");
                 restartLevel();
                 return;
             }
@@ -640,6 +679,7 @@ if (typeof String.prototype.startsWith != 'function') {
             }); 
 
             if (guards_.length > 0) {
+                playAudio("hit");
                 restartLevel();
                 return;
             }
@@ -780,14 +820,17 @@ if (typeof String.prototype.startsWith != 'function') {
         if (levelName === "") {
             levelName = "title.json";
         }
+        
+        alertImg.src = "entities/alert.png";
+        alertImg.onload = function () {
+            changeLevel(levelName, function () {
+                if (levelName !== "title.json") return;
 
-        changeLevel(levelName, function () {
-            if (levelName !== "title.json") return;
-
-            window.setTimeout(function () {
-                changeLevel("intro.json");
-            }, 5000);
-        });
+                window.setTimeout(function () {
+                    changeLevel("intro.json");
+                }, 5000);
+            });
+        };
     });
 
     $(window).on("resize", updateWidth);
